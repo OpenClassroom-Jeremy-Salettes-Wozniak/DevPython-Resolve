@@ -111,32 +111,51 @@ actions = [
 ]
 
 from itertools import combinations
+import csv
+import os
 
 # Créer plusieurs portefeuille d'action qui propose des actions avec pour limite 500 et une dont une seul action est achetable
 # Pour cela il faudra permuter les actions et créer les listes d'actions.
 def create_portefeuille_actions(actions):
-    portefeuille_actions = []
     # On créer une liste de toutes les combinaisons possibles limite 500 et une dont une seul action est achetable
     for i in range(1, len(actions)):
+        # La fonction combinations permet de créer toutes les combinaisons possibles
+        num_combinaisons = 0
         for comb in combinations(actions, i):
-            # On vérifie que le portefeuille est valide
+            # Pour chaque combinaison on vérifie que le portefeuille que la somme des prix des actions est inférieur à 500
             if verif_portefeuille(comb):
-                portefeuille_actions.append(comb)
+                num_combinaisons += 1
+                # on sauvegarde le portefeuille dans un fichier csv
+                save_portefeuille_actions(comb, "portefeuille" + str(num_combinaisons) + ".csv")
+
             else :
                 print("Le portefeuille est trop cher")
-    return portefeuille_actions
-    
 
 def verif_portefeuille(portefeuille):
-    # On vérifie que le portefeuille est valide
+    # On vérifie que la somme des prix des actions est inférieur à 500
     if sum([action["price"] for action in portefeuille]) <= 500:
         # print la somme des prix des actions
         print(sum([action["price"] for action in portefeuille]))
         return True
     else :
+        # print la somme des prix des actions
         print(sum([action["price"] for action in portefeuille]))
         return False
     
-
-actions = create_portefeuille_actions(actions)
-print(actions)
+# On stockent les informations dans un fichier csv
+def save_portefeuille_actions(portefeuille_actions, portefeuille_name):
+    # On créer un dossier pour stocker les portefeuilles
+    os.makedirs("portefeuilles", exist_ok=True)
+    # On créer le chemin du fichier
+    portefeuille_name = os.path.join("portefeuilles", portefeuille_name)
+    # On créer le fichier csv
+    with open(portefeuille_name, "w") as csvfile:
+        # On créer un objet writer
+        writer = csv.writer(csvfile)
+        # On écrit les données dans le fichier csv
+        writer.writerow(["name", "price", "profit"])
+        for action in portefeuille_actions:
+            writer.writerow([action["name"], action["price"], action["profit"]])
+        
+# Eexecute la fonction
+create_portefeuille_actions(actions)
